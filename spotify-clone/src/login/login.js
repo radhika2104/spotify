@@ -1,3 +1,4 @@
+
 // App uses Implicit Grant flow to access WEB APIs = https://developer.spotify.com/documentation/general/guides/authorization/implicit-grant/
 // step1: authorise user by sending params: client_id, response_type, redirect_uri and scope to url - prompts if user is not logged in
 // step2: after login and authorisation,  the final URL will contain a hash fragment with the following data encoded as a query string -access_token, token_type, expires_in and state.
@@ -5,14 +6,13 @@
 // step4: redirect user to application passing access token
 // step5: use access token in call web APIs which return JSON objects
 
+import { ACCESS_TOKEN, EXPIRES_IN, TOKEN_TYPE } from "../common"
 
-
-const client_id = '278165e4182342b5864717c6ce165e8f'
+const client_id = import.meta.env.VITE_CLIENT_ID
 const loginBtn = document.querySelector("#login-btn")
 const scopes = 'user-top-read user-follow-read playlist-read-private user-library-read'
-const redirect_uri= "http://localhost:8080/login/login.html"
-const ACCESS_TOKEN_KEY = "accessToken"
-const APP_URL = "http://localhost:8080"
+const redirect_uri = import.meta.env.VITE_REDIRECT_URI;
+const APP_URL = import.meta.env.VITE_APP_URL;
 
 const authorizeUser = () => {
     let url = 'https://accounts.spotify.com/authorize';
@@ -37,9 +37,9 @@ document.addEventListener("DOMContentLoaded",function(){
 
 // helper function to set local storage
 window.setItemsInLocalStorage = (accessToken, tokenType, expiresIn) =>{
-    localStorage.setItem("accessToken",accessToken)
-    localStorage.setItem("tokenType",tokenType)
-    localStorage.setItem("expiresIn",expiresIn)
+    localStorage.setItem(ACCESS_TOKEN,accessToken)
+    localStorage.setItem(TOKEN_TYPE,tokenType)
+    localStorage.setItem(EXPIRES_IN,expiresIn)
     // redirect window to dashboard
     window.location.href = APP_URL;
 }
@@ -47,7 +47,7 @@ window.setItemsInLocalStorage = (accessToken, tokenType, expiresIn) =>{
 // step4:redirect user to application passing access token
 window.addEventListener("load",function(){
     // if local storage has accesstoken coming from hash fragment on final load of url, redirect to user's dashboard
-    const accessToken = this.localStorage.getItem(ACCESS_TOKEN_KEY)
+    const accessToken = this.localStorage.getItem(ACCESS_TOKEN)
     if (accessToken){
         window.location.href = `${APP_URL}/dashboard/dashboard.html`;
     }
