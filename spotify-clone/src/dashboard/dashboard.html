@@ -15,7 +15,7 @@
         </aside>
         <section class="content">
             <header class="border-2 px-8 py-4">
-                <nav class="flex justify-end">
+                <nav class="flex justify-end relative">
                     <button id="profile-btn" class="flex items-center gap-x-2 rounded-2xl py-1 px-2 hover:bg-light-black">
                         <section id="profile-image">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 bg-gray rounded-full">
@@ -23,16 +23,27 @@
                               </svg>                              
                         </section>
                         <section class="flex justify-center items-center gap-x-2">
-                            <h3 id="profile-name">Radhika</h3>
+                            <h3 id="profile-name"></h3>
                             <i>▼</i>
                         </section>
                     </button>
+                    <ul id="profile-menu" class="hidden absolute top-12 right-0 w-[200px] hover:cursor-pointer bg-light-black p-1 rounded-md">
+                        <li id="logout" class="p-1 rounded-md hover:bg-gray">Logout</li>
+                    </ul>
                 </nav>
             </header>
-            <section>main content</section>
+            <article class="p-4">
+                <h1 class="text-2xl">Featured</h1>
+                <section class="featured-songs gap-4 grid grid-cols-auto-fill-cards" id="featured-playlist-items">
+
+                </section>
+            </article>
+            <section>
+                
+            </section>
         </section>
         <footer class="now-playing">now playing</footer>
     </main>
-    
+    <script type="module" src="dashboard.js"></script>
 </body>
 </html>
