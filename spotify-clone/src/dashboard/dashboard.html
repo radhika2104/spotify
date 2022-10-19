@@ -13,8 +13,8 @@
         <aside class="sidenav">
             sidenav
         </aside>
-        <section class="content">
-            <header class="border-2 px-8 py-4">
+        <article class="content bg-transparent overflow-auto relative">
+            <header class="header px-8 py-4 bg-transparent">
                 <nav class="flex justify-end relative">
                     <button id="profile-btn" class="flex items-center gap-x-2 rounded-2xl py-1 px-2 hover:bg-light-black">
                         <section id="profile-image">
@@ -32,16 +32,42 @@
                     </ul>
                 </nav>
             </header>
-            <article class="p-4">
-                <h1 class="text-2xl">Featured</h1>
-                <section class="featured-songs gap-4 grid grid-cols-auto-fill-cards" id="featured-playlist-items">
-
-                </section>
+            <article id="cover-content" class="grid content-center w-full h-72 -z-[1] px-4 absolute top-0 bg-gradient-to-b from-light-black to-black-base">
+                <h1 class="text-6xl">Hello,<span id=""></span></h1>
             </article>
-            <section>
-                
+            <section id="page-content" class="bg-black-base mt-48">
+                <!-- <article class="p-4">
+                    <h1 class="mb-4 text-2xl font-bold capitalize">Featured</h1>
+                    <section class="featured-songs gap-4 grid grid-cols-auto-fill-cards" id="featured-playlist-items">
+                    </section>
+                </article> -->
+                <!-- <header class="px-8">
+                    <nav>
+                    <ul class="grid grid-cols-[50px_2fr_1fr_50px]  justify-start items-center gap-4 text-secondary">
+                            <li class="justify-self-center">#</li>
+                            <li>TITLE</li>
+                            <li>ALBUM</li>
+                            <li>🕑</li>
+                    </ul> 
+                    </nav>
+                </header>
+                <section id="tracks" class="px-8">
+                    <article class="track grid grid-cols-[50px_2fr_1fr_50px] gap-4 justify-items-start items-center hover:bg-light-black rounded-md">
+                        <p class="justify-self-center">1</p>
+                        <section class="grid grid-cols-[32px_1fr] gap-4">
+                            <img src="" alt="" class="h-8 w-8">
+                            <article class="flex flex-col gap-1">
+                                <h2 class="text-primary text-xl">song name</h2>
+                                <h3 class="text-secondary text-sm">artist names</h3>
+                            </article>
+                        </section>
+                        <p>Indigo</p>
+                        <p>1:36</p>
+                    </article>
+                </section> -->
+
             </section>
-        </section>
+        </article>
         <footer class="now-playing">now playing</footer>
     </main>
     <script type="module" src="dashboard.js"></script>
