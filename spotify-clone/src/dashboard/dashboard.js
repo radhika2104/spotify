@@ -92,9 +92,9 @@ const fillDashboardMainContent = () => {
 const fillPlaylistItemContent = () => {
     const pageContent = document.getElementById("page-content");
     pageContent.innerHTML = 
-    `<header id="playlist-header" class="px-8 py-4">
-    <nav>
-       <ul class="grid grid-cols-[50px_2fr_1fr_50px]  justify-start items-center gap-4 text-secondary">
+    `<header id="playlist-header" class="mx-8 py-4 border-secondary border-b-[0.5px]">
+    <nav  class="py-2">
+       <ul class="grid grid-cols-[50px_1fr_1fr_50px]  justify-start items-center gap-4 text-secondary">
             <li class="justify-self-center">#</li>
             <li>TITLE</li>
             <li>ALBUM</li>
@@ -102,7 +102,7 @@ const fillPlaylistItemContent = () => {
        </ul> 
     </nav>
     </header>
-    <section id="tracks" class="px-8"></section>`;
+    <section id="tracks" class="px-8 mt-4"></section>`;
 
 }
 
@@ -120,39 +120,68 @@ function formatDuration(duration){
         return `${min}:${secleft}`
     }
 }
+const trackClickHandler = (event) => {
+    document.querySelectorAll(".track").forEach(trackItem =>{
+        if (trackItem.id === event.target.id || trackItem.contains(event.target)){
+            trackItem.classList.add("bg-gray")
+            trackItem.querySelector(".track-no").style.visibility = 'hidden'
+            trackItem.querySelector(".play").style.visibility = 'visible'
+            // trackItem.querySelector(".album").style.color = 'text-primary'
+            // trackItem.querySelector(".artist").style.color = 'text-primary'
+        } else {
+            trackItem.classList.remove("bg-gray")
+            trackItem.querySelector(".track-no").style.visibility = 'visible'
+            trackItem.querySelector(".play").style.visibility = 'hidden'
+            // trackItem.querySelector(".album").style.color = 'text-secondary'
+            // trackItem.querySelector(".artist").style.color = 'text-secondary'
+        }
+    })
+}
 
+function playTrackHandler(event){
+    console.log("playBtnTrackDetails:: ", event)
+    const playBtnTrackDetails = event.target.attributes.trackdetails.value;
+    console.log("playBtnTrackDetails:: ", playBtnTrackDetails)
+    // console.log('printing details of a song:',image.url,artistNames,title,duration,id,previewURL)
+}
 
 const loadPlaylistTracks = async (playlist_id) => {
     // endpoint - 	https://api.spotify.com/v1/playlists/{playlist_id}/tracks
     // playlistTracks: "playlists/{playlist_id}/tracks"
     const tracksSection = document.getElementById('tracks');
     const playlistTracksData = await fetchRequest(`${ENDPOINT.playlists}/${playlist_id}`)
-    console.log("playlistTracksData:" ,playlistTracksData)
+    // console.log("playlistTracksData:" ,playlistTracksData)
     // data to be fetched, index,title,artist names, album,date added, length of song
     const trackItems = playlistTracksData.tracks.items;
     // console.log("track items:" ,trackItems)
     let trackCounter = 0
     for (let trackItem of trackItems){
         // const {track:{id,artists:[{name:artistName}],name:title,album:{name:albumName},duration_ms:duration}} = trackItem;
-        const {track:{id,artists,name:title,album,duration_ms:duration}} = trackItem;
+        const {track:{id,artists,name:title,album,duration_ms:duration,preview_url:previewURL}} = trackItem;
         // console.log("album and artist object :",album, artists)
         let image = album.images.find(img=>img.height===64)
+        let artistNames = Array.from(artists,(artists)=>artists.name).join(", ")
         // console.log("printing object of items(added_at,artistName,title,duration):",id,artists,name,album,duration)
         trackCounter++;
         tracksSection.innerHTML += 
-        `<article id="${id}" class="track p-1 grid grid-cols-[50px_2fr_1fr_50px] gap-4 justify-items-start items-center hover:bg-light-black rounded-md">
-        <p class="justify-self-center text-secondary">${trackCounter}</p>
+        `<article id="${id}" class="track p-1 grid grid-cols-[50px_1fr_1fr_50px] gap-4 justify-items-start items-center hover:bg-light-black  rounded-md">
+        <p class="relative w-full flex items-center justify-center text-secondary">
+        <span class="track-no">${trackCounter}</span>
+        <button trackdetails="${image.url},${artistNames},${title},${duration},${id},${previewURL}" id="play-track${id}" class="play absolute w-full invisible text-primary">▶</button>
+        </p>
         <section class="grid grid-cols-[auto_1fr] gap-4 place-items-center">
-            <img src="${image.url}" alt="${title}" class="h-10 w-10 ">
-            <article class="flex flex-col">
-                <h2 class="text-primary text-xl">${title}</h2>
-                <h3 class="text-secondary text-sm">${Array.from(artists,(artists)=>artists.name).join(", ")}</h3>
+            <img src="${image.url}" alt="${title}" class="h-10 w-10">
+            <article class="flex flex-col gap-2 justify-center">
+                <h2 class="text-primary text-base line-clamp-1">${title}</h2>
+                <h3 class="artist text-secondary text-xs line-clamp-1">${artistNames}</h3>
             </article>
         </section>
-        <p class="text-secondary">${album.name}</p>
-        <p class="text-secondary">${formatDuration(duration)}</p>
-    </article>`
+        <p class="album text-secondary text-sm">${album.name}</p>
+        <p class="text-secondary text-sm">${formatDuration(duration)}</p>
+        </article>`;
+        
     }
+    tracksSection.addEventListener("click", trackClickHandler)
     
 }
 
@@ -160,20 +189,25 @@ const scrollEventHandler = (event) =>{
     let {scrollTop} = event.target;
     const header = document.querySelector(".header");
     if (scrollTop >= header.offsetHeight){
-        header.classList.add("sticky","top-0","bg-dark","z-[2]")
+        header.classList.add("sticky","top-0","bg-black","z-[2]")
         header.classList.remove("bg-transparent")
     } else {
-        header.classList.remove("sticky","top-0","bg-dark","z-[2]")
+        header.classList.remove("sticky","top-0","bg-black","z-[2]")
         header.classList.add("bg-transparent")
     }
     if (history.state.type === SECTIONTYPE.PLAYLIST){
         const playlistHeader = document.getElementById('playlist-header')
+        const coverContent = document.querySelector('#cover-content')
         // console.log('playlistHeader',playlistHeader)
-        if (scrollTop >= playlistHeader.offsetTop){
-            console.log("playlistHeader.offsetTop:",playlistHeader.offsetTop)
-            playlistHeader.classList.add("relative",`top-${header.offsetHeight}px`)
+        if (scrollTop >= (coverContent.offsetHeight - header.offsetHeight)){
+            // console.log("playlistHeader.offsetTop:",playlistHeader.offsetTop)
+            playlistHeader.classList.add("sticky", "bg-black-secondary","px-8")
+            playlistHeader.classList.remove("mx-8")
+            playlistHeader.style.top = `${header.offsetHeight}px`
         } else {
-            playlistHeader.classList.remove("relative",`top-${header.offsetHeight}px`)
+            playlistHeader.classList.remove("sticky", "bg-black-secondary","px-8")
+            playlistHeader.classList.add("mx-8")
+            playlistHeader.style.top = `revert`
         }
     }
 
@@ -187,6 +221,15 @@ const loadSection = (section) => {
         // section = {type: playlist}
         fillPlaylistItemContent(section.playlist)
         loadPlaylistTracks(section.playlist)  
+        // let tracksArray = document.querySelector("#tracks").childNodes
+        // console.log("tracksArrays::",tracksArray)
+        // for (let trackItem in tracksArray){
+        //     console.log("trackitem in tracksArray::",tracksArray[trackItem])
+        //     const playBtn= tracksArray[trackItem].querySelector(".play")
+        //     console.log("playBtn inside a trackitem in tracksArray::",playBtn)
+        //     playBtn.addEventListener("click", playTrackHandler)
+        // }
+        
     }
     document.querySelector(".content").removeEventListener("scroll",scrollEventHandler)
     document.querySelector(".content").addEventListener("scroll",scrollEventHandler)
