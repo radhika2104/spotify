@@ -2,6 +2,13 @@ import { ENDPOINT, SECTIONTYPE } from "../common"
 import { fetchRequest } from "../api"
 import { logout } from "../common";
 
+const audio = new Audio()
+const nowPlayingPlayBtn = document.getElementById('play')
+const nowPlayingProgress = document.getElementById('progress')
+const songDurationCompleted = document.getElementById('song-duration-completed')
+const totalSongDuration = document.getElementById('total-song-duration')
+const volume = document.getElementById('volume')
+let progressInterval;
 const profileMenu = document.getElementById('profile-menu');
 const profileBtnHandler = (event) =>{
     // stop the clickevent on document from working as it is adding hidden class to profileMenu
@@ -14,7 +21,6 @@ const profileBtnHandler = (event) =>{
         profileMenu.classList.add("hidden")
     }
     
-
 }
 const loadUserProfile = async () => {
     const profileImage = document.getElementById('profile-image')
@@ -92,7 +98,7 @@ const fillDashboardMainContent = () => {
 const fillPlaylistItemContent = () => {
     const pageContent = document.getElementById("page-content");
     pageContent.innerHTML = 
-    `<header id="playlist-header" class="mx-8 py-4 border-secondary border-b-[0.5px]">
+    `<header id="playlist-header" class="mx-8 py-4 border-secondary border-b-[0.5px] z-10">
     <nav  class="py-2">
        <ul class="grid grid-cols-[50px_1fr_1fr_50px]  justify-start items-center gap-4 text-secondary">
             <li class="justify-self-center">#</li>
@@ -135,14 +141,47 @@ const trackClickHandler = (event) => {
             // trackItem.querySelector(".album").style.color = 'text-secondary'
             // trackItem.querySelector(".artist").style.color = 'text-secondary'
         }
+
+        if (trackItem.contains(event.target) && event.target.classList.contains("play")){
+            playTrackHandler(event.target)
+        }
     })
 }
 
-function playTrackHandler(event){
-    console.log("playBtnTrackDetails:: ", event)
-    const playBtnTrackDetails = event.target.attributes.trackdetails.value;
+function onSongDataLoaded(){
+    // console.log("duration coming from meta data loaded:",audio.duration)
+    const durationInSecondsString = `0:${audio.duration.toFixed(0)}`
+    // console.log("durationInSecondsString:",durationInSecondsString)
+    totalSongDuration.textContent = durationInSecondsString
+    nowPlayingPlayBtn.textContent = "pause_circle"
+}
+
+function playTrackHandler(eventTarget){
+    console.log("playBtnTrackDetails:: ", eventTarget)
+    const playBtnTrackDetails = eventTarget.attributes.trackdetails.value;
     console.log("playBtnTrackDetails:: ", playBtnTrackDetails)
-    // console.log('printing details of a song:',image.url,artistNames,title,duration,id,previewURL)
+    const [imageURL,artistNames,title,duration,id,previewURL] = playBtnTrackDetails.split("@,")
+    const nowPlayingSongEl = document.getElementById('now-playing-song');
+    const nowPlayingArtistEl = document.getElementById('now-playing-artists');
+    const nowPlayingImageEl = document.getElementById('now-playing-image');
+    nowPlayingImageEl.src = imageURL
+    nowPlayingArtistEl.textContent = artistNames
+    nowPlayingSongEl.textContent = title
+    audio.src = previewURL;
+    audio.removeEventListener("loadedmetadata",onSongDataLoaded)
+    audio.addEventListener("loadedmetadata",onSongDataLoaded)
+    clearInterval(progressInterval)
+    progressInterval = setInterval(() =>{
+        if (audio.paused){
+            return
+        } 
+        let currentSongTime = `${audio.currentTime.toFixed(0)<10 ? "0:0" + audio.currentTime.toFixed(0): "0:" + audio.currentTime.toFixed(0)}`
+        songDurationCompleted.textContent = currentSongTime;
+        nowPlayingProgress.style.width = `${(audio.currentTime/audio.duration)*100}%`;
+    } ,100);
+    audio.play()
+
+    
 }
 
 const loadPlaylistTracks = async (playlist_id) => {
@@ -167,7 +206,7 @@ const loadPlaylistTracks = async (playlist_id) => {
         `<article id="${id}" class="track p-1 grid grid-cols-[50px_1fr_1fr_50px] gap-4 justify-items-start items-center hover:bg-light-black  rounded-md">
         <p class="relative w-full flex items-center justify-center text-secondary">
         <span class="track-no">${trackCounter}</span>
-        <button trackdetails="${image.url},${artistNames},${title},${duration},${id},${previewURL}" id="play-track${id}" class="play absolute w-full invisible text-primary">▶</button>
+        <button trackdetails="${image.url}@,${artistNames}@,${title}@,${duration}@,${id}@,${previewURL}" id="play-track${id}" class="play absolute w-full invisible text-primary">▶</button>
         </p>
         <section class="grid grid-cols-[auto_1fr] gap-4 place-items-center">
             <img src="${image.url}" alt="${title}" class="h-10 w-10">
