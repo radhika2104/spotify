@@ -129,15 +129,16 @@ function formatDuration(duration){
 const trackClickHandler = (event) => {
     document.querySelectorAll(".track").forEach(trackItem =>{
         if (trackItem.id === event.target.id || trackItem.contains(event.target)){
-            trackItem.classList.add("bg-gray")
-            trackItem.querySelector(".track-no").style.visibility = 'hidden'
-            trackItem.querySelector(".play").style.visibility = 'visible'
+            trackItem.classList.add("bg-gray", "selected")
+            // trackItem.querySelector(".track-no").style.visibility = 'hidden'
+            // trackItem.querySelector(".play").style.visibility = 'visible'
             // trackItem.querySelector(".album").style.color = 'text-primary'
             // trackItem.querySelector(".artist").style.color = 'text-primary'
         } else {
-            trackItem.classList.remove("bg-gray")
-            trackItem.querySelector(".track-no").style.visibility = 'visible'
-            trackItem.querySelector(".play").style.visibility = 'hidden'
+            trackItem.classList.remove("bg-gray", "selected")
+            // trackItem.querySelector(".track-no").style.visibility = 'visible'
+            // trackItem.querySelector(".play").style.visibility = 'hidden'
+
             // trackItem.querySelector(".album").style.color = 'text-secondary'
             // trackItem.querySelector(".artist").style.color = 'text-secondary'
         }
@@ -148,12 +149,37 @@ const trackClickHandler = (event) => {
     })
 }
 
-function onSongDataLoaded(){
+function updateIconsForPlayMode(eventTarget){
+    nowPlayingPlayBtn.textContent = "pause_circle"
+    console.log("logging eventTarget:",eventTarget)
+    eventTarget.innerHTML = `<span class="material-symbols-outlined">
+    pause
+    </span>`
+    // eventTarget.setAttribute("data-play")
+
+}
+function onSongDataLoaded(eventTarget){
     // console.log("duration coming from meta data loaded:",audio.duration)
     const durationInSecondsString = `0:${audio.duration.toFixed(0)}`
     // console.log("durationInSecondsString:",durationInSecondsString)
     totalSongDuration.textContent = durationInSecondsString
-    nowPlayingPlayBtn.textContent = "pause_circle"
+    updateIconsForPlayMode(eventTarget)
+    
+    
+}
+
+function onNowPlayingPlayBtnClick(eventTarget){
+    if (audio.paused){
+        audio.play()
+        updateIconsForPlayMode(eventTarget)
+    } else {
+        audio.pause()
+        nowPlayingPlayBtn.textContent = "play_circle"
+        eventTarget.innerHTML = ""
+        eventTarget.textContent = "▶"
+        // eventTarget.removeAttribute("data-play")
+    }
+
 }
 
 function playTrackHandler(eventTarget){
@@ -168,8 +194,9 @@ function playTrackHandler(eventTarget){
     nowPlayingArtistEl.textContent = artistNames
     nowPlayingSongEl.textContent = title
     audio.src = previewURL;
-    audio.removeEventListener("loadedmetadata",onSongDataLoaded)
-    audio.addEventListener("loadedmetadata",onSongDataLoaded)
+    audio.removeEventListener("loadedmetadata",()=>onSongDataLoaded(eventTarget))
+    audio.addEventListener("loadedmetadata",()=>onSongDataLoaded(eventTarget))
+    nowPlayingPlayBtn.addEventListener("click",()=>onNowPlayingPlayBtnClick(eventTarget))
     clearInterval(progressInterval)
     progressInterval = setInterval(() =>{
         if (audio.paused){
@@ -181,7 +208,6 @@ function playTrackHandler(eventTarget){
     } ,100);
     audio.play()
 
-    
 }
 
 const loadPlaylistTracks = async (playlist_id) => {
