@@ -2,12 +2,16 @@ import { ENDPOINT, SECTIONTYPE } from "../common"
 import { fetchRequest } from "../api"
 import { logout } from "../common";
 
+const controller = new AbortController();
+const signal = controller.signal;
+
 const audio = new Audio()
 const nowPlayingPlayBtn = document.getElementById('play')
 const nowPlayingProgress = document.getElementById('progress')
 const songDurationCompleted = document.getElementById('song-duration-completed')
 const totalSongDuration = document.getElementById('total-song-duration')
 const volume = document.getElementById('volume')
+const timeline = document.getElementById('timeline')
 let progressInterval;
 const profileMenu = document.getElementById('profile-menu');
 const profileBtnHandler = (event) =>{
@@ -155,9 +159,16 @@ function updateIconsForPlayMode(eventTarget){
     eventTarget.innerHTML = `<span class="material-symbols-outlined">
     pause
     </span>`
-    // eventTarget.setAttribute("data-play")
+    eventTarget.setAttribute("data-play","true")
 
 }
+
+function updateIconsForPauseMode(eventTarget){
+    nowPlayingPlayBtn.textContent = "play_circle"
+    eventTarget.innerHTML = ""
+    eventTarget.textContent = "▶"
+}
+
 function onSongDataLoaded(eventTarget){
     // console.log("duration coming from meta data loaded:",audio.duration)
     const durationInSecondsString = `0:${audio.duration.toFixed(0)}`
@@ -174,39 +185,52 @@ function onNowPlayingPlayBtnClick(eventTarget){
         updateIconsForPlayMode(eventTarget)
     } else {
         audio.pause()
-        nowPlayingPlayBtn.textContent = "play_circle"
-        eventTarget.innerHTML = ""
-        eventTarget.textContent = "▶"
-        // eventTarget.removeAttribute("data-play")
+        updateIconsForPauseMode(eventTarget)
+        
     }
 
 }
 
 function playTrackHandler(eventTarget){
+    const btnWithDataPlay = document.querySelector("[data-play='true']")
     console.log("playBtnTrackDetails:: ", eventTarget)
     const playBtnTrackDetails = eventTarget.attributes.trackdetails.value;
     console.log("playBtnTrackDetails:: ", playBtnTrackDetails)
     const [imageURL,artistNames,title,duration,id,previewURL] = playBtnTrackDetails.split("@,")
-    const nowPlayingSongEl = document.getElementById('now-playing-song');
-    const nowPlayingArtistEl = document.getElementById('now-playing-artists');
-    const nowPlayingImageEl = document.getElementById('now-playing-image');
-    nowPlayingImageEl.src = imageURL
-    nowPlayingArtistEl.textContent = artistNames
-    nowPlayingSongEl.textContent = title
-    audio.src = previewURL;
-    audio.removeEventListener("loadedmetadata",()=>onSongDataLoaded(eventTarget))
-    audio.addEventListener("loadedmetadata",()=>onSongDataLoaded(eventTarget))
-    nowPlayingPlayBtn.addEventListener("click",()=>onNowPlayingPlayBtnClick(eventTarget))
-    clearInterval(progressInterval)
-    progressInterval = setInterval(() =>{
+    
+    if (btnWithDataPlay?.id === `play-track${id}`){
         if (audio.paused){
-            return
-        } 
-        let currentSongTime = `${audio.currentTime.toFixed(0)<10 ? "0:0" + audio.currentTime.toFixed(0): "0:" + audio.currentTime.toFixed(0)}`
-        songDurationCompleted.textContent = currentSongTime;
-        nowPlayingProgress.style.width = `${(audio.currentTime/audio.duration)*100}%`;
-    } ,100);
-    audio.play()
+            audio.play()
+            updateIconsForPlayMode(eventTarget)
+        } else {
+            audio.pause()
+            updateIconsForPauseMode(eventTarget)
+        }
+        
+    } else {
+        document.querySelectorAll("[data-play]").forEach(btn=>btn.setAttribute("data-play","false"))
+        btnWithDataPlay?.setAttribute("data-play","false")
+        const nowPlayingSongEl = document.getElementById('now-playing-song');
+        const nowPlayingArtistEl = document.getElementById('now-playing-artists');
+        const nowPlayingImageEl = document.getElementById('now-playing-image');
+        nowPlayingImageEl.src = imageURL
+        nowPlayingArtistEl.textContent = artistNames
+        nowPlayingSongEl.textContent = title
+        audio.src = previewURL;
+        controller.abort()
+        audio.addEventListener("loadedmetadata",()=>onSongDataLoaded(eventTarget), {signal:controller.signal})
+        nowPlayingPlayBtn.addEventListener("click",()=>onNowPlayingPlayBtnClick(eventTarget))
+        clearInterval(progressInterval)
+        progressInterval = setInterval(() =>{
+            if (audio.paused){
+                return
+            } 
+            let currentSongTime = `${audio.currentTime.toFixed(0)<10 ? "0:0" + audio.currentTime.toFixed(0): "0:" + audio.currentTime.toFixed(0)}`
+            songDurationCompleted.textContent = currentSongTime;
+            nowPlayingProgress.style.width = `${(audio.currentTime/audio.duration)*100}%`;
+        } ,100);
+        audio.play()
+    }
 
 }
 
@@ -313,7 +337,17 @@ document.addEventListener("DOMContentLoaded",()=>{
         }
     })
     
+    volume.addEventListener("change",()=>{
+        console.log("volume.value",volume.value);
+        audio.volume = volume.value/100;
+    })
 
+    timeline.addEventListener("click", function(event){
+        const timelineWidth = window.getComputedStyle(timeline).width
+        const timeToSeek = (event.offsetX/parseInt(timelineWidth))*audio.duration
+        audio.currentTime = timeToSeek;
+        nowPlayingProgress.style.width = `${(audio.currentTime/audio.duration)*100}%`;
+    })
 })
 
 window.addEventListener("popstate",function(event){
