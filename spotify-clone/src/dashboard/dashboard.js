@@ -239,7 +239,16 @@ const loadPlaylistTracks = async (playlist_id) => {
     // playlistTracks: "playlists/{playlist_id}/tracks"
     const tracksSection = document.getElementById('tracks');
     const playlistTracksData = await fetchRequest(`${ENDPOINT.playlists}/${playlist_id}`)
-    // console.log("playlistTracksData:" ,playlistTracksData)
+    console.log("playlistTracksData:" ,playlistTracksData)
+    const coverElement = document.querySelector("#cover-content");
+    coverElement.innerHTML =    `<section class="grid grid-cols-[auto_1fr] gap-4 pt-18">
+            <img src="${playlistTracksData.images[0].url}" alt="" class="object-contain h-44 w-44">
+            <section>
+                <small>PLAYLIST</small>
+                <h2 id="playlist-name" class="text-4xl">${playlistTracksData.name}</h2>
+                <p id="playlist-details">${playlistTracksData.tracks.items.length} songs</p>
+            </section>
+        </section>`
     // data to be fetched, index,title,artist names, album,date added, length of song
     const trackItems = playlistTracksData.tracks.items;
     // console.log("track items:" ,trackItems)
