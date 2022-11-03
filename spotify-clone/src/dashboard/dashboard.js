@@ -236,7 +236,8 @@ function playTrackHandler([imageURL,artistNames,title,duration,id,previewURL]){
         const nowPlayingSongEl = document.getElementById('now-playing-song');
         const nowPlayingArtistEl = document.getElementById('now-playing-artists');
         const nowPlayingImageEl = document.getElementById('now-playing-image');
-        const audioControl = document.getElementById('audio-control')
+        const audioControl = document.getElementById('audio-control');
+        const songInfo = document.getElementById("song-info");
         // console.log("check audio",audioControl)
         audioControl.setAttribute("data-track-id",id);
         // console.log("auudio 235")
@@ -244,6 +245,7 @@ function playTrackHandler([imageURL,artistNames,title,duration,id,previewURL]){
         nowPlayingArtistEl.textContent = artistNames
         nowPlayingSongEl.textContent = title
         audio.src = previewURL;
+        songInfo.classList.remove("invisible")
         // console.log("line 238 audio.src:",audio.src)
         audio.play()
         // console.log("auudio play?")
