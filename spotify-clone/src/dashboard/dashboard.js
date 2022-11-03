@@ -144,6 +144,11 @@ const trackClickHandler = (event) => {
         }
 
         if (trackItem.contains(event.target) && event.target.classList.contains("play")){
+            // console.log("consoling event from 147:", event)
+            // didnt understand the use of stop propagation to keep selection!
+            // if (event?.stopPropagation){ 
+            //     event.stopPropagation()
+            // }
             playTrackHandler(event.target)
         }
     })
@@ -280,7 +285,7 @@ const loadPlaylistTracks = async (playlist_id) => {
         <section class="grid grid-cols-[auto_1fr] gap-4 place-items-center">
             <img src="${image.url}" alt="${title}" class="h-10 w-10">
             <article class="flex flex-col gap-2 justify-center">
-                <h2 class="text-primary text-base line-clamp-1">${title}</h2>
+                <h2 class="song-title text-primary text-base line-clamp-1">${title}</h2>
                 <h3 class="artist text-secondary text-xs line-clamp-1">${artistNames}</h3>
             </article>
         </section>
@@ -366,6 +371,18 @@ document.addEventListener("DOMContentLoaded",()=>{
     audio.addEventListener("play", ()=>{
         const selectedTrackID = audioControl.getAttribute("data-track-id");
         console.log("selectedTrackID", selectedTrackID)
+        const tracksSection = document.getElementById('tracks');
+        const playingTrack = tracksSection?.querySelector("article.playing");
+        const selectedTrack = tracksSection?.querySelector(`[id="${selectedTrackID}"]`)
+        console.log('playingTrack,selectedTrack:',playingTrack,selectedTrack)
+        if (playingTrack !== null && playingTrack?.id !== selectedTrack?.id){
+            playingTrack.classList.remove("playing")
+            console.log("playing track and selected track not same. so remove green from playing and add to selected")
+        } else {
+            console.log("playing track and selected track same. so let green")
+        }
+        selectedTrack?.classList.add("playing")
+        console.log("selectedTrack: ", selectedTrack)
         progressInterval = setInterval(() =>{
             if (audio.paused){
                 return
