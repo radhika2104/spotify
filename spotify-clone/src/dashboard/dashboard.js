@@ -1,6 +1,6 @@
-import { ENDPOINT, SECTIONTYPE } from "../common"
+import { ENDPOINT, SECTIONTYPE,LOADED_TRACKS } from "../common"
 import { fetchRequest } from "../api"
-import { logout } from "../common";
+import { logout,setItemsInLocalStorage, getItemsInLocalStorage } from "../common";
 
 // const controller = new AbortController();
 // const signal = controller.signal;
@@ -126,7 +126,7 @@ function formatDuration(duration){
     }
 }
 const trackClickHandler = (event) => {
-    console.log("function call countsss 128:: ", event.target)
+    // console.log("function call countsss 128:: ", event.target)
     document.querySelectorAll(".track").forEach(trackItem =>{
         if (trackItem.id === event.target.id || trackItem.contains(event.target)){
             trackItem.classList.add("bg-gray", "selected")
@@ -149,7 +149,9 @@ const trackClickHandler = (event) => {
             // if (event?.stopPropagation){ 
             //     event.stopPropagation()
             // }
-            playTrackHandler(event.target)
+            const playBtnTrackDetails = event.target.attributes.trackdetails.value;
+            const [imageURL,artistNames,title,duration,id,previewURL] = playBtnTrackDetails.split("@,")
+            playTrackHandler([imageURL,artistNames,title,duration,id,previewURL])
         }
     })
 }
@@ -217,13 +219,13 @@ function togglePlay(){
     }
 }
 
-function playTrackHandler(eventTarget){
+function playTrackHandler([imageURL,artistNames,title,duration,id,previewURL]){
     // const btnWithDataPlay = document.querySelector("[data-play='true']")
     // console.log("playBtnTrackDetails:: ", eventTarget)
-    const playBtnTrackDetails = eventTarget.attributes.trackdetails.value;
+    // const playBtnTrackDetails = eventTarget.attributes.trackdetails.value;
     // console.log("playBtnTrackDetails:: ", playBtnTrackDetails)
-    const [imageURL,artistNames,title,duration,id,previewURL] = playBtnTrackDetails.split("@,")
-    console.log("line 222 audio.src and previewurl:",audio.src, previewURL)
+    // const [imageURL,artistNames,title,duration,id,previewURL] = playBtnTrackDetails.split("@,")
+    // console.log("line 222 audio.src and previewurl:",audio.src, previewURL)
     if (audio?.src === previewURL){
         togglePlay()
         
@@ -254,7 +256,7 @@ const loadPlaylistTracks = async (playlist_id) => {
     // playlistTracks: "playlists/{playlist_id}/tracks"
     const tracksSection = document.getElementById('tracks');
     const playlistTracksData = await fetchRequest(`${ENDPOINT.playlists}/${playlist_id}`)
-    console.log("playlistTracksData:" ,playlistTracksData)
+    // console.log("playlistTracksData:" ,playlistTracksData)
     const coverElement = document.querySelector("#cover-content");
     coverElement.innerHTML =    `<section class="grid grid-cols-[auto_1fr] gap-4 pt-18">
             <img src="${playlistTracksData.images[0].url}" alt="" class="object-contain h-44 w-44">
@@ -268,14 +270,19 @@ const loadPlaylistTracks = async (playlist_id) => {
     const trackItems = playlistTracksData.tracks.items;
     // console.log("track items:" ,trackItems)
     let trackCounter = 0
-    for (let trackItem of trackItems){
+    let loadedTracksArray = []
+    for (let trackItem of trackItems.filter(item=> item.track.preview_url)){
         // const {track:{id,artists:[{name:artistName}],name:title,album:{name:albumName},duration_ms:duration}} = trackItem;
         const {track:{id,artists,name:title,album,duration_ms:duration,preview_url:previewURL}} = trackItem;
         // console.log("album and artist object :",album, artists)
         let image = album.images.find(img=>img.height===64)
+        let imageURL = image.url;
         let artistNames = Array.from(artists,(artists)=>artists.name).join(", ")
         // console.log("printing object of items(added_at,artistName,title,duration):",id,artists,name,album,duration)
+        // push details of each track for local storage in array as an object
+        loadedTracksArray.push([imageURL,artistNames,title,duration,id,previewURL])
         trackCounter++;
+        
         tracksSection.innerHTML += 
         `<article id="${id}" class="track p-1 grid grid-cols-[50px_1fr_1fr_50px] gap-4 justify-items-start items-center hover:bg-light-black  rounded-md">
         <p class="relative w-full flex items-center justify-center text-secondary">
@@ -293,8 +300,10 @@ const loadPlaylistTracks = async (playlist_id) => {
         <p class="text-secondary text-sm">${formatDuration(duration)}</p>
         </article>`;
         
+        
     }
     tracksSection.addEventListener("click", trackClickHandler)
+    setItemsInLocalStorage(LOADED_TRACKS,loadedTracksArray)
     
 }
 
@@ -348,6 +357,45 @@ const loadSection = (section) => {
     document.querySelector(".content").addEventListener("scroll",scrollEventHandler)
 }
 
+function getCurrentTrack(){
+    // audio control will have id of current track as attribute
+    // if id is present find current index in loaded tracks
+    const audioControl = document.querySelector("#audio-control")
+    const currentTrackPlayingID = audioControl.getAttribute("data-track-id")
+    if (currentTrackPlayingID){
+        console.log("currentTrackPlayingID exists:", currentTrackPlayingID)
+        const tracksArrayFromStorage= getItemsInLocalStorage(LOADED_TRACKS);
+        console.log("tracksArrayFromStorage exists:", tracksArrayFromStorage)
+        const currentTrackIndex = tracksArrayFromStorage?.findIndex(trackItem => trackItem[4] === currentTrackPlayingID)
+        return {currentTrackIndex, tracks:tracksArrayFromStorage}
+    }
+    return {}
+}
+
+function playNextTrack(){
+    console.log("i am in playNextTrack()")
+    const {currentTrackIndex = -1, tracks= null} = getCurrentTrack()
+    console.log("currentTrackIndex,tracks:",currentTrackIndex,tracks)
+    // if track index currently playing is greater than 1st song and less than last song
+    if (currentTrackIndex > -1 && currentTrackIndex < tracks.length-1){
+        console.log("tracks[currentTrackIndex+1]:",tracks[currentTrackIndex+1])
+        playTrackHandler(tracks[currentTrackIndex+1])
+    }
+
+}
+
+function playPrevTrack(){
+    console.log("i am in playPrevTrack()")
+    const {currentTrackIndex = -1, tracks= null} = getCurrentTrack()
+    // if track index currently playing is greater than 1st song and less than last song
+    console.log("currentTrackIndex,tracks:",currentTrackIndex,tracks)
+    if (currentTrackIndex > 0){
+        console.log("tracks[currentTrackIndex-1]:",tracks[currentTrackIndex-1])
+        playTrackHandler(tracks[currentTrackIndex-1])
+    }
+
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
     
     const nowPlayingProgress = document.getElementById('progress')
@@ -355,6 +403,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     const audioControl = document.getElementById('audio-control')
     const volume = document.getElementById('volume')
     const timeline = document.getElementById('timeline')
+    const prev = document.querySelector("#prev")
+    const next = document.querySelector("#next")
     let progressInterval;
     loadUserProfile()
     const section = {type: SECTIONTYPE.DASHBOARD}
@@ -370,19 +420,20 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     audio.addEventListener("play", ()=>{
         const selectedTrackID = audioControl.getAttribute("data-track-id");
-        console.log("selectedTrackID", selectedTrackID)
+        // console.log("selectedTrackID", selectedTrackID)
         const tracksSection = document.getElementById('tracks');
         const playingTrack = tracksSection?.querySelector("article.playing");
         const selectedTrack = tracksSection?.querySelector(`[id="${selectedTrackID}"]`)
-        console.log('playingTrack,selectedTrack:',playingTrack,selectedTrack)
+        
+        // console.log('playingTrack,selectedTrack:',playingTrack,selectedTrack)
         if (playingTrack !== null && playingTrack?.id !== selectedTrack?.id){
             playingTrack.classList.remove("playing")
-            console.log("playing track and selected track not same. so remove green from playing and add to selected")
+            // console.log("playing track and selected track not same. so remove green from playing and add to selected")
         } else {
-            console.log("playing track and selected track same. so let green")
+            // console.log("playing track and selected track same. so let green")
         }
         selectedTrack?.classList.add("playing")
-        console.log("selectedTrack: ", selectedTrack)
+        // console.log("selectedTrack: ", selectedTrack)
         progressInterval = setInterval(() =>{
             if (audio.paused){
                 return
@@ -407,9 +458,12 @@ document.addEventListener("DOMContentLoaded",()=>{
     nowPlayingPlayBtn.addEventListener("click",togglePlay)
 
     volume.addEventListener("change",()=>{
-        console.log("volume.value",volume.value);
+        // console.log("volume.value",volume.value);
         audio.volume = volume.value/100;
     })
+
+    next.addEventListener("click", playNextTrack)
+    prev.addEventListener("click", playPrevTrack)
 
     timeline.addEventListener("click", function(event){
         const timelineWidth = window.getComputedStyle(timeline).width
