@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Player</title>
+    <link rel="shortcut icon" href="../assets/Spotify_Icon_RGB_Green.png" type="image/x-icon">
     <link href="../style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 
@@ -12,14 +13,33 @@
 <body class="h-screen bg-dark text-primary">
     <main class="h-full grid grid-template-areas grid-cols-[250px_1fr] grid-rows-[1fr_auto]">
         <aside class="sidenav">
-            sidenav
+            <nav class="py-8 px-4 flex flex-col items-start gap-3">
+                <section>
+                    <a href="/"><img src="../assets/Spotify_Logo_RGB_White.png" alt="spotify white logo" class="h-10 w-full object-contain"></a>
+                    
+                </section>
+                <section>
+                    <ul class="flex flex-col gap-4 text-sm text-secondary">
+                        <!-- <li class="cursor:pointer hover:text-primary flex gap-2 items-center"><a href="/"><span class="material-symbols-outlined">home</span><span>Home</span></li></a> -->
+                        <!-- <li class="cursor:pointer hover:text-primary flex gap-2 items-center"><span class="material-symbols-outlined">search</span><span>Search</span></li> -->
+                    </ul>
+                </section>
+                <section id="user-playlists" class="w-full border-t border-light-black pt-4">
+                    <ul class="flex flex-col gap-4 text-sm text-secondary">
+                        <li>playlist 1</li>
+                        <li>playlist 2</li>
+                    </ul>
+                </section>
+            </nav>
+            
+
         </aside>
         <article class="content bg-transparent overflow-auto relative">
-            <header class="header px-8 py-4 bg-transparent z-10">
+            <header class="header px-8 py-4 sticky top-0 bg-black/[0] z-10">
                 <nav class="flex justify-end relative">
-                    <button id="profile-btn" class="flex items-center gap-x-2 rounded-2xl py-1 px-2 hover:bg-light-black">
+                    <button id="profile-btn" class="bg-black flex items-center gap-x-2 rounded-2xl py-1 px-2 hover:bg-light-black">
                         <section id="profile-image">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 bg-gray rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 bg-gray rounded-full">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>                              
                         </section>
@@ -33,10 +53,12 @@
                     </ul>
                 </nav>
             </header>
-            <article id="cover-content" class="grid content-center w-full h-72 -z-[1] px-4 absolute top-0 bg-gradient-to-b from-light-black to-black-base">
+            <!-- grid-cols-[250px_1fr] grid-rows-[250px] -->
+            <article id="cover-content" class="grid  content-center w-full h-80 -z-[1] px-4 absolute top-0 bg-gradient-to-b from-light-black to-black-base pt-16">
                 <h1 class="text-6xl">Hello,<span id=""></span></h1>
+                
             </article>
-            <section id="page-content" class="bg-black-base mt-48">
+            <section id="page-content" class="bg-black-base mt-64">
                 <!-- <article class="p-4">
                     <h1 class="mb-4 text-2xl font-bold capitalize">Featured</h1>
                     <section class="featured-songs gap-4 grid grid-cols-auto-fill-cards" id="featured-playlist-items">
@@ -58,7 +80,7 @@
                         <section class="grid grid-cols-[32px_1fr] gap-4">
                             <img src="" alt="" class="h-8 w-8">
                             <article class="flex flex-col gap-1">
-                                <h2 class="text-primary text-xl">song name</h2>
+                                <h2 class="song-title text-primary text-xl">song name</h2>
                                 <h3 class="text-secondary text-sm">artist names</h3>
                             </article>
                         </section>
@@ -69,33 +91,33 @@
 
             </section>
         </article>
-        <footer class="now-playing border-t-light-black border-t bg-black-secondary text-secondary px-4">
+        <footer class="now-playing border-t-light-black border-t bg-black-secondary text-secondary p-4">
             <section class="grid grid-cols-[1fr_2fr_1fr] gap-10">
-                <section class="grid grid-cols-[auto_1fr] gap-4 place-content-center">
+                <section id="song-info" class="grid grid-cols-[auto_1fr] gap-4 place-content-center invisible">
                     <img id="now-playing-image" src=""  class="h-12 w-12" srcset="">
                     <section class="flex flex-col justify-center">
                         <h2 id="now-playing-song" class="text-sm font-semibold text-primary">song title</h2>
                         <p id="now-playing-artists" class="text-xs">song artists</p>
                     </section>
                 </section>
-                <section id="audio-control flex flex-col items-center justify-center">
+                <section id="audio-control" class="flex flex-col items-center justify-center">
                     <section class="flex items-center justify-center gap-6">
-                        <button   class="hover:text-primary"><span id="prev" class="material-symbols-outlined" style="font-size: 48px;">
+                        <button   class="hover:text-primary"><span id="prev" class="material-symbols-outlined" style="font-size: 36px;">
                             skip_previous
                             </span></button>
-                        <button   class="hover:text-primary"><span id="play" class="material-symbols-outlined" style="font-size: 48px;">
+                        <button   class="hover:text-primary"><span id="play" class="material-symbols-outlined" style="font-size: 40px;">
                             play_circle
                             </span></button>
-                        <button    class="hover:text-primary"><span id="next" class="material-symbols-outlined" style="font-size: 48px;">
+                        <button    class="hover:text-primary"><span id="next" class="material-symbols-outlined" style="font-size: 36px;">
                             skip_next
                             </span></button>
                     </section>
-                    <section class="flex w-full items-center justify-center p-1 gap-4">
-                        <span id="song-duration-completed">0:00</span>
+                    <section class="flex w-full items-center justify-center gap-4">
+                        <span id="song-duration-completed" class="text-sm">0:00</span>
                         <section  id="timeline" class="h-2 w-full cursor-pointer bg-secondary rounded-3xl">
                             <section id="progress" class="w-0 bg-green h-2 rounded-3xl"></section>
                         </section>
-                        <span id="total-song-duration">0:00</span>
+                        <span id="total-song-duration" class="text-sm">0:00</span>
                     </section>
                 </section>
                 <section id="volume-control" class="flex items-center justify-center gap-2">
