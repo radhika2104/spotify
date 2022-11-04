@@ -1,7 +1,7 @@
 import { ENDPOINT, SECTIONTYPE,LOADED_TRACKS } from "../common"
 import { fetchRequest } from "../api"
 import { logout,setItemsInLocalStorage, getItemsInLocalStorage } from "../common";
-
+let displayName;
 // const controller = new AbortController();
 // const signal = controller.signal;
 
@@ -22,14 +22,15 @@ const profileBtnHandler = (event) =>{
     
 }
 const loadUserProfile = async () => {
+    return new Promise(async (resolve,reject) => {
     const profileImage = document.getElementById('profile-image')
     const profileName = document.getElementById('profile-name')
     const profileBtn = document.getElementById('profile-btn')
 
     const UserProfileInfo = await fetchRequest(ENDPOINT.userInfo)
-    const {display_name,images} = UserProfileInfo;
+    const {display_name:displayName,images} = UserProfileInfo;
     // console.log("api call json data:",UserProfileInfo)
-    profileName.textContent = display_name;
+    profileName.textContent = displayName;
     if (images?.length){
         profileImage.classList.add("hidden")
     } else {
@@ -37,6 +38,8 @@ const loadUserProfile = async () => {
     }
 
     profileBtn.addEventListener("click", profileBtnHandler)
+    resolve({displayName})
+})
 }
 
 const navigateToSelectedPlaylist = (event,id) => {
@@ -78,6 +81,8 @@ const loadPlaylistSectionData = () => {
 }
 
 const fillDashboardMainContent = () => {
+    const coverContent = document.getElementById("cover-content");
+    coverContent.innerHTML = `<h1 class="text-6xl">Hello ${displayName.split(" ")[0]}!</h1>`
     const pageContent = document.getElementById('page-content')
     const contentMap = new Map([['Featured','featured-playlist-items'],['Top Playlists','toplist-playlist-items']])
     let innerHTMLdata="";
@@ -97,7 +102,7 @@ const fillDashboardMainContent = () => {
 const fillPlaylistItemContent = () => {
     const pageContent = document.getElementById("page-content");
     pageContent.innerHTML = 
-    `<header id="playlist-header" class="mx-8 py-4 border-secondary border-b-[0.5px] z-10">
+    `<header id="playlist-header" class="mx-8 border-secondary border-b-[0.5px] z-10">
     <nav  class="py-2">
        <ul class="grid grid-cols-[50px_1fr_1fr_50px]  justify-start items-center gap-4 text-secondary">
             <li class="justify-self-center">#</li>
@@ -260,11 +265,11 @@ const loadPlaylistTracks = async (playlist_id) => {
     const playlistTracksData = await fetchRequest(`${ENDPOINT.playlists}/${playlist_id}`)
     // console.log("playlistTracksData:" ,playlistTracksData)
     const coverElement = document.querySelector("#cover-content");
-    coverElement.innerHTML =    `<section class="grid grid-cols-[auto_1fr] gap-4 pt-18">
+    coverElement.innerHTML =    `<section class="grid grid-cols-[auto_1fr] gap-8 pt-18">
             <img src="${playlistTracksData.images[0].url}" alt="" class="object-contain h-44 w-44">
             <section>
                 <small>PLAYLIST</small>
-                <h2 id="playlist-name" class="text-4xl">${playlistTracksData.name}</h2>
+                <h2 id="playlist-name" class="text-6xl">${playlistTracksData.name}</h2>
                 <p id="playlist-details">${playlistTracksData.tracks.items.length} songs</p>
             </section>
         </section>`
@@ -312,23 +317,32 @@ const loadPlaylistTracks = async (playlist_id) => {
 const scrollEventHandler = (event) =>{
     let {scrollTop} = event.target;
     const header = document.querySelector(".header");
-    if (scrollTop >= header.offsetHeight){
-        header.classList.add("sticky","top-0","bg-black","z-[2]")
-        header.classList.remove("bg-transparent")
-    } else {
-        header.classList.remove("sticky","top-0","bg-black","z-[2]")
-        header.classList.add("bg-transparent")
-    }
+    const coverContent = document.getElementById("cover-content");
+    const ccHeight = coverContent.offsetHeight;
+    const coverOpacity = 100 - (scrollTop>= ccHeight ? 100: ((scrollTop/ccHeight)*100));
+    // console.log("cover opacity: ",coverOpacity)
+    const headerOpacity = scrollTop >= header.offsetHeight? 100: ((scrollTop/header.offsetHeight)*100);
+    coverContent.style.opacity = `${coverOpacity}%`
+    header.style.background = `rgba(0 0 0/${headerOpacity}%)` 
+    // if (scrollTop >= header.offsetHeight){
+    //     header.classList.add("sticky","top-0","bg-black","z-[2]")
+    //     header.classList.remove("bg-transparent")
+    // } else {
+    //     header.classList.remove("sticky","top-0","bg-black","z-[2]")
+    //     header.classList.add("bg-transparent")
+    // }
     if (history.state.type === SECTIONTYPE.PLAYLIST){
         const playlistHeader = document.getElementById('playlist-header')
         const coverContent = document.querySelector('#cover-content')
         // console.log('playlistHeader',playlistHeader)
+        // scrollTop >= (coverContent.offsetHeight - header.offsetHeight
         if (scrollTop >= (coverContent.offsetHeight - header.offsetHeight)){
-            // console.log("playlistHeader.offsetTop:",playlistHeader.offsetTop)
+            // console.log("playlistHeader sticky")
             playlistHeader.classList.add("sticky", "bg-black-secondary","px-8")
             playlistHeader.classList.remove("mx-8")
             playlistHeader.style.top = `${header.offsetHeight}px`
         } else {
+            // console.log(" playlistHeader no sticky")
             playlistHeader.classList.remove("sticky", "bg-black-secondary","px-8")
             playlistHeader.classList.add("mx-8")
             playlistHeader.style.top = `revert`
@@ -398,7 +412,7 @@ function playPrevTrack(){
 
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async ()=>{
     
     const nowPlayingProgress = document.getElementById('progress')
     const songDurationCompleted = document.getElementById('song-duration-completed')
@@ -408,7 +422,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const prev = document.querySelector("#prev")
     const next = document.querySelector("#next")
     let progressInterval;
-    loadUserProfile()
+    ({displayName}= await loadUserProfile())
     const section = {type: SECTIONTYPE.DASHBOARD}
     history.pushState(section,"","")
     loadSection(section)
