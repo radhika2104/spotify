@@ -8,7 +8,8 @@ export const ENDPOINT = {
     userInfo : "me",
     featuredPlaylist: "browse/featured-playlists?limit=5",
     topPlaylist: "browse/categories/toplists/playlists?limit=10",
-    playlists :"playlists"
+    playlists :"playlists",
+    userPlaylist: "me/playlists"
 }
 // category playlist >> browse/categories/{category_id}/playlists
 export const logout = () => {

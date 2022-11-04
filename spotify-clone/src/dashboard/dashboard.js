@@ -42,7 +42,7 @@ const loadUserProfile = async () => {
 })
 }
 
-const navigateToSelectedPlaylist = (event,id) => {
+const navigateToSelectedPlaylist = (id) => {
     
     // console.log("grid playlist:",event.target)
     // console.log("playlist id:",id)
@@ -65,7 +65,7 @@ const loadPlaylist = async (endpoint,elementID) => {
         playlistItem.className = "bg-black-secondary rounded p-4 hover:cursor-pointer hover:bg-light-black transition duration-150 hover:ease-in"
         playlistItem.id = id;
         playlistItem.setAttribute("data-type","playlist");
-        playlistItem.addEventListener("click",(event)=>navigateToSelectedPlaylist(event,id))
+        playlistItem.addEventListener("click",()=>navigateToSelectedPlaylist(id))
         playlistItem.innerHTML =
     `   <img src="${images[0].url}" alt="${name}" class="rounded mb-2 object-contain drop-shadow">
         <h2 class="text-base font-semibold mb-4 truncate">${name}</h2>
@@ -412,6 +412,27 @@ function playPrevTrack(){
 
 }
 
+// function onUserPlaylistClick(id){
+//     const section = {type: SECTIONTYPE.DASHBOARD}
+//     history.pushState(section,"","")
+//     loadSection(section)
+// }
+
+const loadUserPlaylists = async () => {
+    const userPlaylists = await fetchRequest(ENDPOINT.userPlaylist);
+    console.log("loading users playlists: ",userPlaylists)
+    const userPlaylistSection = document.querySelector("#user-playlists >ul")
+    userPlaylistSection.innerHTML = ""
+    for (let {name, id} of userPlaylists.items){
+        const listItem = document.createElement("li")
+        listItem.textContent = name
+        listItem.className = "cursor:pointer hover:text-primary"
+        listItem.addEventListener("click", () => navigateToSelectedPlaylist(id))
+        userPlaylistSection.appendChild(listItem)
+
+    }
+}
+
 document.addEventListener("DOMContentLoaded",async ()=>{
     
     const nowPlayingProgress = document.getElementById('progress')
@@ -423,6 +444,7 @@ document.addEventListener("DOMContentLoaded",async ()=>{
     const next = document.querySelector("#next")
     let progressInterval;
     ({displayName}= await loadUserProfile())
+    loadUserPlaylists()
     const section = {type: SECTIONTYPE.DASHBOARD}
     history.pushState(section,"","")
     loadSection(section)

@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Player</title>
+    <link rel="shortcut icon" href="../assets/Spotify_Icon_RGB_Green.png" type="image/x-icon">
     <link href="../style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 
@@ -12,7 +13,26 @@
 <body class="h-screen bg-dark text-primary">
     <main class="h-full grid grid-template-areas grid-cols-[250px_1fr] grid-rows-[1fr_auto]">
         <aside class="sidenav">
-            sidenav
+            <nav class="py-8 px-4 flex flex-col items-start gap-3">
+                <section>
+                    <a href="/"><img src="../assets/Spotify_Logo_RGB_White.png" alt="spotify white logo" class="h-10 w-full object-contain"></a>
+                    
+                </section>
+                <section>
+                    <ul class="flex flex-col gap-4 text-sm text-secondary">
+                        <!-- <li class="cursor:pointer hover:text-primary flex gap-2 items-center"><a href="/"><span class="material-symbols-outlined">home</span><span>Home</span></li></a> -->
+                        <!-- <li class="cursor:pointer hover:text-primary flex gap-2 items-center"><span class="material-symbols-outlined">search</span><span>Search</span></li> -->
+                    </ul>
+                </section>
+                <section id="user-playlists" class="w-full border-t border-light-black pt-4">
+                    <ul class="flex flex-col gap-4 text-sm text-secondary">
+                        <li>playlist 1</li>
+                        <li>playlist 2</li>
+                    </ul>
+                </section>
+            </nav>
+            
+
         </aside>
         <article class="content bg-transparent overflow-auto relative">
             <header class="header px-8 py-4 sticky top-0 bg-black/[0] z-10">
