@@ -3,7 +3,7 @@
 Spotify clone implemented using Spotify's API. 
 
 🔗Live Link: [https://spotify-clone-rm.netlify.app/](https://spotify-clone-rm.netlify.app/) 
-- Note: The above link is for authorized users(refer user registeration for more). Github code for the same is in main branch and main URL link
+- Note: The above link is for authorized users(refer user registeration for more). Github code for the same is in main branch
 
 🔗Live Link for guest user login: https://rm-spotify-guestuser.netlify.app/
 - Note: The above link is for guest user login. Github code for the same is in suggest-guest-login branch.
