@@ -2,7 +2,11 @@
 
 Spotify clone implemented using Spotify's API. 
 
-🔗Live Link: [https://spotify-clone-rm.netlify.app/](https://spotify-clone-rm.netlify.app/)
+🔗Live Link: [https://spotify-clone-rm.netlify.app/](https://spotify-clone-rm.netlify.app/) 
+- Note: The above link is for authorized users(refer user registeration for more). Github code for the same is in main branch and main URL link
+
+🔗Live Link for guest user login: https://rm-spotify-guestuser.netlify.app/
+- Note: The above link is for guest user login. Github code for the same is in suggest-guest-login branch.
 
 ## Features and App Design 💫
 
@@ -31,3 +35,9 @@ Spotify clone implemented using Spotify's API.
 
 ## User Registeration
 By default only those users which are allowed by developer in spotify's developer app's user access are allowed to access the app.To know more follow - https://developer.spotify.com/documentation/web-api/guides/development-extended-quota-modes
+
+
+## Notes for Maintenance and Updates
+
+- It is important to update dependencies specially vite in order to know complete explanation of errors
+- For any changes in URL or user registeration, update to be made in spotify developer account
